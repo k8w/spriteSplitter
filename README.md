@@ -5,6 +5,9 @@ A multi plateform tool to cut a spriteSheet into individual frames.
 
 ----------
 
+# k8w's modification
+1. Prevent click at already added selection
+1. Modify `isEmptyPixel` to support Wii texture slice
 
 Installation
 -------------
