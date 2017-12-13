@@ -94,11 +94,14 @@
         /*******************************/
 
 
-        function isEmptyPixel(targetPixel){
-             return targetPixel.red === refPixel.red
-             && targetPixel.blue === refPixel.blue
-             && targetPixel.green === refPixel.green
-             &&   targetPixel.alpha === refPixel.alpha
+        function isEmptyPixel(targetPixel) {
+            //k8w: 修改空像素判定方法，以支持Wii的纹理切分
+            return targetPixel.red === 0 && targetPixel.green === 0 && targetPixel.blue === 0 && targetPixel.alpha === 255
+                || targetPixel.alpha > 0 && targetPixel.alpha < 255;
+            //  return targetPixel.red === refPixel.red
+            //  && targetPixel.blue === refPixel.blue
+            //  && targetPixel.green === refPixel.green
+            //  &&   targetPixel.alpha === refPixel.alpha
         }
 
         function isPixelInSelections(selections, pixel){
@@ -135,7 +138,12 @@
             return selections
         }
 
-        function selectFrameAt(startX, startY){
+        function selectFrameAt(startX, startY) {
+            //k8w: 防止重复点击
+            if (isPixelInSelections(spriteSplitter.finalListSelections, {x: startX, y: startY})) {
+                return;
+            }
+
             if(spriteSplitter.finalListSelections === undefined){
                 spriteSplitter.finalListSelections = []
             }
@@ -250,9 +258,8 @@
         }
 
 
-        function expandFromPixel(selection){
-
-
+        function expandFromPixel(selection) {
+            console.log('expandFromPixel', selection.x, selection.y);
             let isFinished = false
 
             while(!isFinished){
@@ -331,14 +338,13 @@
 
 
         function expandFromAllDirections(selection){
-            let offset = 0
+            let top = expandToTheTop(selection)
+            let right = expandToTheRight(selection)
+            let bottom = expandToTheBottom(selection)
+            let left = expandToTheLeft(selection)
 
-            offset += expandToTheRight(selection)
-            offset += expandToTheBottom(selection)
-            offset += expandToTheLeft(selection)
-            offset += expandToTheTop(selection)
-
-            return offset
+            console.log('上右下左', top, right, bottom, left);
+            return top + right + bottom + left;
         }
 
         function expandToTheRight(selection){
@@ -421,7 +427,7 @@
 
         function selectFrameAndOverlayIt(e){
             let mousePos = getMousePos(e)
-            let selections = selectFrameAt(mousePos.x, mousePos.y)
+            let selections = selectFrameAt(mousePos.x | 0, mousePos.y | 0)
 
             selections.forEach(function(selection){
                 putOverlay(selection)
